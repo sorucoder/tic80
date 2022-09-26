@@ -18,7 +18,7 @@ func toTextData(goString *string) unsafe.Pointer {
 	for _, goRune := range *goString {
 		if goRune > 0 {
 			switch {
-			case goRune >= 0x00 && goRune <= 0x7F:
+			case goRune <= 0x7F:
 				*textData = append(*textData, byte(goRune))
 			default:
 				*textData = append(*textData, byte('?'))
@@ -42,9 +42,40 @@ func toByteData(goBytes *[]byte) (buffer unsafe.Pointer, count int) {
 	return
 }
 
+// paletteSet represents a subset of the color palette.
+type paletteSet uint16
+
+func (mask *paletteSet) Clear() {
+	*mask = 0
+}
+
+// AddColor adds a color to the set.
+func (mask *paletteSet) AddColor(color int) {
+	*mask |= paletteSet(1 << (color % 16))
+}
+
+// RemoveColor removes a color from the set.
+func (mask *paletteSet) RemoveColor(color int) {
+	*mask &^= paletteSet(1 << (color % 16))
+}
+
+// Colors returns a slice containing the colors.
+func (mask *paletteSet) Colors() []byte {
+	if *mask > 0 {
+		enabled := make([]byte, 0, 16)
+		for color := 0; color < 16; color++ {
+			if *mask&paletteSet(1<<color) > 0 {
+				enabled = append(enabled, byte(color))
+			}
+		}
+		return enabled
+	}
+	return nil
+}
+
 // FontOptions provides additional options to [tic80.Font].
 type FontOptions struct {
-	transparentColors []byte
+	transparentColors paletteSet
 	characterWidth    int
 	characterHeight   int
 	fixed             bool
@@ -53,7 +84,7 @@ type FontOptions struct {
 }
 
 var defaultFontOptions FontOptions = FontOptions{
-	transparentColors: nil,
+	transparentColors: 0,
 	characterWidth:    8,
 	characterHeight:   8,
 	fixed:             false,
@@ -73,10 +104,19 @@ func NewFontOptions() *FontOptions {
 
 // AddTransparentColor adds an additional color to the list of colors to render as transparent.
 func (options *FontOptions) AddTransparentColor(color int) *FontOptions {
-	if options.transparentColors == nil {
-		options.transparentColors = make([]byte, 0, 1)
-	}
-	options.transparentColors = append(options.transparentColors, byte(color%16))
+	options.transparentColors.AddColor(color)
+	return options
+}
+
+// RemoveTransparentColor removes a color to the list of colors to render as transparent.
+func (options *FontOptions) RemoveTransparentColor(color int) *FontOptions {
+	options.transparentColors.RemoveColor(color)
+	return options
+}
+
+// SetOpaque removes all colors to render transparent
+func (options *FontOptions) SetOpaque() *FontOptions {
+	options.transparentColors.Clear()
 	return options
 }
 
@@ -113,7 +153,7 @@ type MapOptions struct {
 	height            int
 	screenX           int
 	screenY           int
-	transparentColors []byte
+	transparentColors paletteSet
 	scale             int
 }
 
@@ -124,7 +164,7 @@ var defaultMapOptions MapOptions = MapOptions{
 	height:            17,
 	screenX:           0,
 	screenY:           0,
-	transparentColors: nil,
+	transparentColors: 0,
 	scale:             1,
 }
 
@@ -140,10 +180,19 @@ func NewMapOptions() *MapOptions {
 
 // AddTransparentColor adds an additional color to the list of colors to render as transparent.
 func (options *MapOptions) AddTransparentColor(color int) *MapOptions {
-	if options.transparentColors == nil {
-		options.transparentColors = make([]byte, 0, 1)
-	}
-	options.transparentColors = append(options.transparentColors, byte(color%16))
+	options.transparentColors.AddColor(color)
+	return options
+}
+
+// RemoveTransparentColor removes a color to the list of colors to render as transparent.
+func (options *MapOptions) RemoveTransparentColor(color int) *MapOptions {
+	options.transparentColors.RemoveColor(color)
+	return options
+}
+
+// SetOpaque removes all colors to render transparent
+func (options *MapOptions) SetOpaque() *MapOptions {
+	options.transparentColors.Clear()
 	return options
 }
 
@@ -404,7 +453,7 @@ func (options *SoundEffectOptions) SetStereoVolume(leftLevel, rightLevel int) *S
 
 // SpriteOptions provides additional options to [tic80.Spr]
 type SpriteOptions struct {
-	transparentColors []byte
+	transparentColors paletteSet
 	scale             int
 	flip              int
 	rotate            int
@@ -413,7 +462,7 @@ type SpriteOptions struct {
 }
 
 var defaultSpriteOptions SpriteOptions = SpriteOptions{
-	transparentColors: nil,
+	transparentColors: 0,
 	scale:             1,
 	flip:              0,
 	rotate:            0,
@@ -433,10 +482,19 @@ func NewSpriteOptions() *SpriteOptions {
 
 // AddTransparentColor adds an additional color to the list of colors to render as transparent.
 func (options *SpriteOptions) AddTransparentColor(color int) *SpriteOptions {
-	if options.transparentColors == nil {
-		options.transparentColors = make([]byte, 0, 1)
-	}
-	options.transparentColors = append(options.transparentColors, byte(color%16))
+	options.transparentColors.AddColor(color)
+	return options
+}
+
+// RemoveTransparentColor removes a color to the list of colors to render as transparent.
+func (options *SpriteOptions) RemoveTransparentColor(color int) *SpriteOptions {
+	options.transparentColors.RemoveColor(color)
+	return options
+}
+
+// SetOpaque removes all colors to render transparent
+func (options *SpriteOptions) SetOpaque() *SpriteOptions {
+	options.transparentColors.Clear()
 	return options
 }
 
@@ -503,7 +561,7 @@ const (
 // TexturedTriangleOptions provides additional options for [tic80.Ttri]
 type TexturedTriangleOptions struct {
 	useTiles             bool
-	transparentColors    []byte
+	transparentColors    paletteSet
 	useDepthCalculations bool
 	z0                   int
 	z1                   int
@@ -512,7 +570,7 @@ type TexturedTriangleOptions struct {
 
 var defaultTexturedTriangleOptions TexturedTriangleOptions = TexturedTriangleOptions{
 	useTiles:             false,
-	transparentColors:    nil,
+	transparentColors:    0,
 	useDepthCalculations: false,
 	z0:                   0,
 	z1:                   0,
@@ -531,10 +589,19 @@ func NewTexturedTriangleOptions() *TexturedTriangleOptions {
 
 // AddTransparentColor adds an additional color to the list of colors to render as transparent.
 func (options *TexturedTriangleOptions) AddTransparentColor(color int) *TexturedTriangleOptions {
-	if options.transparentColors == nil {
-		options.transparentColors = make([]byte, 0, 1)
-	}
-	options.transparentColors = append(options.transparentColors, byte(color%16))
+	options.transparentColors.AddColor(color)
+	return options
+}
+
+// RemoveTransparentColor removes a color to the list of colors to render as transparent.
+func (options *TexturedTriangleOptions) RemoveTransparentColor(color int) *TexturedTriangleOptions {
+	options.transparentColors.RemoveColor(color)
+	return options
+}
+
+// SetOpaque removes all colors to render transparent
+func (options *TexturedTriangleOptions) SetOpaque() *TexturedTriangleOptions {
+	options.transparentColors.Clear()
 	return options
 }
 
@@ -702,7 +769,8 @@ func Font(text string, x, y int, options *FontOptions) (textWidth int) {
 		options = &defaultFontOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
+	transparentColors := options.transparentColors.Colors()
+	transparentColorBuffer, transparentColorCount := toByteData(&transparentColors)
 	textBuffer := toTextData(&text)
 
 	return int(rawFont(textBuffer, int32(x), int32(y), transparentColorBuffer, int8(transparentColorCount), int8(options.characterWidth), int8(options.characterHeight), options.fixed, int8(options.scale), options.alternateFont))
@@ -753,7 +821,8 @@ func Map(options *MapOptions) {
 		options = &defaultMapOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
+	transparentColors := options.transparentColors.Colors()
+	transparentColorBuffer, transparentColorCount := toByteData(&transparentColors)
 
 	rawMap(int32(options.x), int32(options.y), int32(options.width), int32(options.height), int32(options.screenX), int32(options.screenY), transparentColorBuffer, int8(transparentColorCount), 0)
 }
@@ -1013,7 +1082,8 @@ func Spr(id, x, y int, options *SpriteOptions) {
 		options = &defaultSpriteOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
+	transparentColors := options.transparentColors.Colors()
+	transparentColorBuffer, transparentColorCount := toByteData(&transparentColors)
 
 	rawSpr(int32(id), int32(x), int32(y), transparentColorBuffer, int8(transparentColorCount), int32(options.scale), int32(options.flip), int32(options.rotate), int32(options.width), int32(options.height))
 }

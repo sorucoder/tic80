@@ -298,10 +298,11 @@ func (options *PrintOptions) TogglePage() *PrintOptions {
 // SoundEffectNote is an enumeration of music notes.
 type SoundEffectNote int
 
-// Note constants
+const NOTE_NONE SoundEffectNote = -1
+
+// Notes
 const (
-	NOTE_NONE SoundEffectNote = -1
-	NOTE_C    SoundEffectNote = iota
+	NOTE_C SoundEffectNote = iota
 	NOTE_C_SHARP
 	NOTE_D
 	NOTE_D_SHARP
@@ -484,9 +485,10 @@ func (options *SpriteOptions) SetSize(width, height int) *SpriteOptions {
 // SyncMask is an enumeration of data banks.
 type SyncMask int
 
+const SYNC_ALL SyncMask = 0
+
 // Banks
 const (
-	SYNC_ALL   SyncMask = 0
 	SYNC_TILES SyncMask = 1 << iota
 	SYNC_SPRITES
 	SYNC_MAP

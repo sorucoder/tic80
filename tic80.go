@@ -1,7 +1,6 @@
 package tic80
 
 import (
-	"bytes"
 	"reflect"
 	"unsafe"
 )
@@ -12,32 +11,34 @@ var (
 	FREE_RAM = (*[0x28000]byte)(unsafe.Pointer(uintptr(0x18000)))
 )
 
-// toCString transforms a Go string into a form useable by TIC-80.
-func toCString(goString *string) unsafe.Pointer {
-	var cStringBuffer bytes.Buffer
+// toTextData transforms a Go string into a form useable by TIC-80.
+func toTextData(goString *string) unsafe.Pointer {
+	textData := new([]byte)
+	*textData = make([]byte, 0, len(*goString)+1)
 	for _, goRune := range *goString {
 		if goRune > 0 {
-			if goRune > 0x00 && goRune < 0x7F {
-				cStringBuffer.WriteRune(goRune)
-			} else {
-				cStringBuffer.WriteRune('?')
+			switch {
+			case goRune >= 0x00 && goRune <= 0x7F:
+				*textData = append(*textData, byte(goRune))
+			default:
+				*textData = append(*textData, byte('?'))
 			}
 		}
 	}
-	cStringBuffer.WriteByte(0)
-
-	cStringBytes := cStringBuffer.Bytes()
-	buffer, _ := toCBuffer(&cStringBytes)
+	*textData = append(*textData, 0)
+	buffer, _ := toByteData(textData)
 	return buffer
 }
 
-// toCBuffer transforms a Go slice of bytes into a form useable by TIC-80
-func toCBuffer(goBytes *[]byte) (buffer unsafe.Pointer, count int) {
-	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(goBytes))
-	buffer = unsafe.Pointer(sliceHeader.Data)
-	// For some odd reason, tinygo considers the type of reflect.SliceHeader.Len to be uintptr,
-	// instead of int. Using the builtin len function instead.
-	count = len(*goBytes)
+// toByteData transforms a Go slice of bytes into a form useable by TIC-80
+func toByteData(goBytes *[]byte) (buffer unsafe.Pointer, count int) {
+	if goBytes != nil {
+		sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(goBytes))
+		buffer = unsafe.Pointer(sliceHeader.Data)
+		// For some odd reason, tinygo considers the type of reflect.SliceHeader.Len to be uintptr,
+		// instead of int. Using the builtin len function instead.
+		count = len(*goBytes)
+	}
 	return
 }
 
@@ -701,8 +702,8 @@ func Font(text string, x, y int, options *FontOptions) (textWidth int) {
 		options = &defaultFontOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toCBuffer(&options.transparentColors)
-	textBuffer := toCString(&text)
+	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
+	textBuffer := toTextData(&text)
 
 	return int(rawFont(textBuffer, int32(x), int32(y), transparentColorBuffer, int8(transparentColorCount), int8(options.characterWidth), int8(options.characterHeight), options.fixed, int8(options.scale), options.alternateFont))
 }
@@ -752,7 +753,7 @@ func Map(options *MapOptions) {
 		options = &defaultMapOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toCBuffer(&options.transparentColors)
+	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
 
 	rawMap(int32(options.x), int32(options.y), int32(options.width), int32(options.height), int32(options.screenX), int32(options.screenY), transparentColorBuffer, int8(transparentColorCount), 0)
 }
@@ -948,7 +949,7 @@ func Print(text string, x, y int, options *PrintOptions) int {
 		options = &defaultPrintOptions
 	}
 
-	textBuffer := toCString(&text)
+	textBuffer := toTextData(&text)
 
 	var optionFixed int8
 	if options.fixed {
@@ -1012,7 +1013,7 @@ func Spr(id, x, y int, options *SpriteOptions) {
 		options = &defaultSpriteOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toCBuffer(&options.transparentColors)
+	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
 
 	rawSpr(int32(id), int32(x), int32(y), transparentColorBuffer, int8(transparentColorCount), int32(options.scale), int32(options.flip), int32(options.rotate), int32(options.width), int32(options.height))
 }
@@ -1045,7 +1046,7 @@ func Ttri(x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2 int, options *TexturedT
 		options = &defaultTexturedTriangleOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toCBuffer(&options.transparentColors)
+	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
 
 	var useTilesValue int32
 	if options.useTiles {
@@ -1075,7 +1076,7 @@ func Trace(message string, options *TraceOptions) {
 		options = &defaultTraceOptions
 	}
 
-	messageBuffer := toCString(&message)
+	messageBuffer := toTextData(&message)
 
 	rawTrace(messageBuffer, int8(options.color))
 }

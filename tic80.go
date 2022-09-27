@@ -73,6 +73,101 @@ func (mask *paletteSet) Colors() []byte {
 	return nil
 }
 
+// Gamepad represents a button id for use with [tic80.Btn] and [tic80.Btnp]
+type Gamepad int
+
+// Gamepad Players
+const (
+	GAMEPAD_1 Gamepad = 8 * iota
+	GAMEPAD_2
+	GAMEPAD_3
+	GAMEPAD_4
+)
+
+// Gamepad Buttons
+const (
+	BUTTON_UP Gamepad = iota
+	BUTTON_DOWN
+	BUTTON_LEFT
+	BUTTON_RIGHT
+	BUTTON_A
+	BUTTON_B
+	BUTTON_X
+	BUTTON_Y
+)
+
+// Keyboard represents a keyboard id for use with [tic80.Key] and [tic80.Keyp]
+type Keyboard int
+
+// Keyboard keys.
+const (
+	KEY_A Keyboard = iota + 1
+	KEY_B
+	KEY_C
+	KEY_D
+	KEY_E
+	KEY_F
+	KEY_G
+	KEY_H
+	KEY_I
+	KEY_J
+	KEY_K
+	KEY_L
+	KEY_M
+	KEY_N
+	KEY_O
+	KEY_P
+	KEY_Q
+	KEY_R
+	KEY_S
+	KEY_T
+	KEY_U
+	KEY_V
+	KEY_W
+	KEY_X
+	KEY_Y
+	KEY_Z
+	KEY_ZERO
+	KEY_ONE
+	KEY_TWO
+	KEY_THREE
+	KEY_FOUR
+	KEY_FIVE
+	KEY_SIX
+	KEY_SEVEN
+	KEY_EIGHT
+	KEY_NINE
+	KEY_MINUS
+	KEY_EQUALS
+	KEY_LEFTBRACKET
+	KEY_RIGHTBRACKET
+	KEY_BACKSLASH
+	KEY_SEMICOLON
+	KEY_APOSTROPHE
+	KEY_GRAVE
+	KEY_COMMA
+	KEY_PERIOD
+	KEY_SLASH
+	KEY_SPACE
+	KEY_TAB
+	KEY_RETURN
+	KEY_BACKSPACE
+	KEY_DELETE
+	KEY_INSERT
+	KEY_PAGEUP
+	KEY_PAGEDOWN
+	KEY_HOME
+	KEY_END
+	KEY_UP
+	KEY_DOWN
+	KEY_LEFT
+	KEY_RIGHT
+	KEY_CAPSLOCK
+	KEY_CTRL
+	KEY_SHIFT
+	KEY_ALT
+)
+
 // FontOptions provides additional options to [tic80.Font].
 type FontOptions struct {
 	transparentColors paletteSet
@@ -114,7 +209,7 @@ func (options *FontOptions) RemoveTransparentColor(color int) *FontOptions {
 	return options
 }
 
-// SetOpaque removes all colors to render transparent
+// SetOpaque removes all colors to render transparent.
 func (options *FontOptions) SetOpaque() *FontOptions {
 	options.transparentColors.Clear()
 	return options
@@ -190,7 +285,7 @@ func (options *MapOptions) RemoveTransparentColor(color int) *MapOptions {
 	return options
 }
 
-// SetOpaque removes all colors to render transparent
+// SetOpaque removes all colors to render transparent.
 func (options *MapOptions) SetOpaque() *MapOptions {
 	options.transparentColors.Clear()
 	return options
@@ -492,7 +587,7 @@ func (options *SpriteOptions) RemoveTransparentColor(color int) *SpriteOptions {
 	return options
 }
 
-// SetOpaque removes all colors to render transparent
+// SetOpaque removes all colors to render transparent.
 func (options *SpriteOptions) SetOpaque() *SpriteOptions {
 	options.transparentColors.Clear()
 	return options
@@ -599,7 +694,7 @@ func (options *TexturedTriangleOptions) RemoveTransparentColor(color int) *Textu
 	return options
 }
 
-// SetOpaque removes all colors to render transparent
+// SetOpaque removes all colors to render transparent.
 func (options *TexturedTriangleOptions) SetOpaque() *TexturedTriangleOptions {
 	options.transparentColors.Clear()
 	return options
@@ -652,7 +747,7 @@ func rawBtn(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btn
-func Btn(id int) bool {
+func Btn(id Gamepad) bool {
 	return rawBtn(int32(id%32)) > 0
 }
 
@@ -663,7 +758,7 @@ func rawBtnp(id, hold, period int32) bool
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Btnp(id, hold, period int) bool {
+func Btnp(id Gamepad, hold, period int) bool {
 	return rawBtnp(int32(id%32), int32(hold), int32(period))
 }
 
@@ -783,7 +878,7 @@ func rawKey(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/key
-func Key(id int) bool {
+func Key(id Keyboard) bool {
 	return rawKey(int32(id)) > 0
 }
 
@@ -794,7 +889,7 @@ func rawKeyp(id int8, hold, period int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Keyp(id, hold, period int) bool {
+func Keyp(id Keyboard, hold, period int) bool {
 	return rawKeyp(int8(id), int32(hold), int32(period)) > 0
 }
 

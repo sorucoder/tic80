@@ -1211,7 +1211,8 @@ func Ttri(x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2 int, options *TexturedT
 		options = &defaultTexturedTriangleOptions
 	}
 
-	transparentColorBuffer, transparentColorCount := toByteData(&options.transparentColors)
+	transparentColors := options.transparentColors.Colors()
+	transparentColorBuffer, transparentColorCount := toByteData(&transparentColors)
 
 	var useTilesValue int32
 	if options.useTiles {

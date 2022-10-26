@@ -822,13 +822,16 @@ func Ellib(x, y, radiusX, radiusY, color int) {
 	rawEllib(int32(x), int32(y), int32(radiusX), int32(radiusY), int8(color%16))
 }
 
+//go:export exit
+func rawExit()
+
 // Exit closes TIC-80.
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/exit
-//
-//go:export exit
-func Exit()
+func Exit() {
+	rawExit()
+}
 
 //go:export fget
 func rawFget(sprite int32, flag int8) bool
@@ -1058,13 +1061,16 @@ func Pix(x, y, color int) int {
 	return int(rawPix(int32(x), int32(y), int8(color%16)))
 }
 
+//go:export pmem
+func rawPmem(address int32, value int64) uint32
+
 // Pmem reads and writes values to persistent memory.
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/pmem
-//
-//go:export pmem
-func Pmem(address int32, value int64) uint32
+func Pmem(address int, value int64) uint32 {
+	return rawPmem(int32(address), value)
+}
 
 //go:export poke
 func rawPoke(address int32, value, bits int8)
@@ -1222,13 +1228,16 @@ func Ttri(x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2 int, options *TexturedT
 	rawTtri(float32(x0), float32(y0), float32(x1), float32(y1), float32(x2), float32(y2), float32(u0), float32(v0), float32(u1), float32(v1), float32(u2), float32(v2), useTilesValue, transparentColorBuffer, int8(transparentColorCount), float32(options.z0), float32(options.z1), float32(options.z2), options.useDepthCalculations)
 }
 
+//go:export time
+func rawTime() float32
+
 // Time returns the number of milliseconds since the game started.
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/time
-//
-//go:export time
-func Time() float32
+func Time() float32 {
+	return rawTime()
+}
 
 //go:export trace
 func rawTrace(messageBuffer unsafe.Pointer, color int8)
@@ -1269,13 +1278,16 @@ func Trib(x0, y0, x1, y1, x2, y2, color int) {
 	rawTrib(float32(x0), float32(y0), float32(x1), float32(y1), float32(x2), float32(y2), int8(color))
 }
 
+//go:export tstamp
+func rawTstamp() uint32
+
 // Tstamp returns the current Unix timestamp.
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/tstamp
-//
-//go:export tstamp
-func Tstamp() uint32
+func Tstamp() uint32 {
+	return rawTstamp()
+}
 
 // Start is a workaround to allow TIC-80 to run Go code.
 // This should be the first function run in BOOT.

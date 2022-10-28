@@ -35,9 +35,8 @@ func toByteData(goBytes *[]byte) (buffer unsafe.Pointer, count int) {
 	if goBytes != nil {
 		sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(goBytes))
 		buffer = unsafe.Pointer(sliceHeader.Data)
-		// For some odd reason, tinygo considers the type of reflect.SliceHeader.Len to be uintptr,
-		// instead of int. Using the builtin len function instead.
-		count = len(*goBytes)
+		// See https://tinygo.org/docs/guides/compatibility/#reflectsliceheader-and-reflectstringheader.
+		count = int(sliceHeader.Len)
 	}
 	return
 }

@@ -30,7 +30,7 @@ func toTextData(goString *string) unsafe.Pointer {
 	return buffer
 }
 
-// toByteData transforms a Go slice of bytes into a form useable by TIC-80
+// toByteData transforms a Go slice of bytes into a form useable by TIC-80.
 func toByteData(goBytes *[]byte) (buffer unsafe.Pointer, count int) {
 	if goBytes != nil {
 		sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(goBytes))
@@ -61,23 +61,23 @@ func (mask *paletteSet) RemoveColor(color int) {
 // Colors returns a slice containing the colors.
 func (mask *paletteSet) Colors() []byte {
 	if *mask > 0 {
-		enabled := make([]byte, 0, 16)
+		set := make([]byte, 0, 16)
 		for color := 0; color < 16; color++ {
 			if *mask&paletteSet(1<<color) > 0 {
-				enabled = append(enabled, byte(color))
+				set = append(set, byte(color))
 			}
 		}
-		return enabled
+		return set
 	}
 	return nil
 }
 
-// Gamepad represents a button id for use with [tic80.Btn] and [tic80.Btnp]
-type Gamepad int
+// Buttons represents a button id for use with [tic80.Btn] and [tic80.Btnp]
+type Buttons int
 
 // Gamepad Players
 const (
-	GAMEPAD_1 Gamepad = 8 * iota
+	GAMEPAD_1 Buttons = 8 * iota
 	GAMEPAD_2
 	GAMEPAD_3
 	GAMEPAD_4
@@ -85,7 +85,7 @@ const (
 
 // Gamepad Buttons
 const (
-	BUTTON_UP Gamepad = iota
+	BUTTON_UP Buttons = iota
 	BUTTON_DOWN
 	BUTTON_LEFT
 	BUTTON_RIGHT
@@ -95,12 +95,12 @@ const (
 	BUTTON_Y
 )
 
-// Keyboard represents a keyboard id for use with [tic80.Key] and [tic80.Keyp]
-type Keyboard int
+// Keys represents a keyboard id for use with [tic80.Key] and [tic80.Keyp]
+type Keys int
 
 // Keyboard keys.
 const (
-	KEY_A Keyboard = iota + 1
+	KEY_A Keys = iota + 1
 	KEY_B
 	KEY_C
 	KEY_D
@@ -746,7 +746,7 @@ func rawBtn(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btn
-func Btn(id Gamepad) bool {
+func Btn(id Buttons) bool {
 	return rawBtn(int32(id%32)) > 0
 }
 
@@ -757,7 +757,7 @@ func rawBtnp(id, hold, period int32) bool
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Btnp(id Gamepad, hold, period int) bool {
+func Btnp(id Buttons, hold, period int) bool {
 	return rawBtnp(int32(id%32), int32(hold), int32(period))
 }
 
@@ -880,7 +880,7 @@ func rawKey(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/key
-func Key(id Keyboard) bool {
+func Key(id Keys) bool {
 	return rawKey(int32(id)) > 0
 }
 
@@ -891,7 +891,7 @@ func rawKeyp(id int8, hold, period int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Keyp(id Keyboard, hold, period int) bool {
+func Keyp(id Keys, hold, period int) bool {
 	return rawKeyp(int8(id), int32(hold), int32(period)) > 0
 }
 

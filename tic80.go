@@ -978,6 +978,8 @@ type mouseData struct {
 	right   bool
 }
 
+var mouse *mouseData = new(mouseData)
+
 //go:export mouse
 func rawMouse(data *mouseData)
 
@@ -986,16 +988,15 @@ func rawMouse(data *mouseData)
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/mouse
 func Mouse() (x, y int, left, middle, right bool, scrollX, scrollY int) {
-	data := new(mouseData)
-	rawMouse(data)
+	rawMouse(mouse)
 
-	x = int(data.x)
-	y = int(data.y)
-	left = data.left
-	middle = data.middle
-	right = data.right
-	scrollX = int(data.scrollX)
-	scrollY = int(data.scrollY)
+	x = int(mouse.x)
+	y = int(mouse.y)
+	left = mouse.left
+	middle = mouse.middle
+	right = mouse.right
+	scrollX = int(mouse.scrollX)
+	scrollY = int(mouse.scrollY)
 	return
 }
 

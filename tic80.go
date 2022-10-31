@@ -72,12 +72,12 @@ func (mask *paletteSet) Colors() []byte {
 	return nil
 }
 
-// Buttons represents a button id for use with [tic80.Btn] and [tic80.Btnp]
-type Buttons int
+// ButtonCode represents a button id for use with [tic80.Btn] and [tic80.Btnp]
+type ButtonCode int
 
 // Gamepad Players
 const (
-	GAMEPAD_1 Buttons = 8 * iota
+	GAMEPAD_1 ButtonCode = 8 * iota
 	GAMEPAD_2
 	GAMEPAD_3
 	GAMEPAD_4
@@ -85,7 +85,7 @@ const (
 
 // Gamepad Buttons
 const (
-	BUTTON_UP Buttons = iota
+	BUTTON_UP ButtonCode = iota
 	BUTTON_DOWN
 	BUTTON_LEFT
 	BUTTON_RIGHT
@@ -95,12 +95,12 @@ const (
 	BUTTON_Y
 )
 
-// Keys represents a keyboard id for use with [tic80.Key] and [tic80.Keyp]
-type Keys int
+// KeyCode represents a keyboard id for use with [tic80.Key] and [tic80.Keyp]
+type KeyCode int
 
 // Keyboard keys.
 const (
-	KEY_A Keys = iota + 1
+	KEY_A KeyCode = iota + 1
 	KEY_B
 	KEY_C
 	KEY_D
@@ -746,7 +746,7 @@ func rawBtn(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btn
-func Btn(id Buttons) bool {
+func Btn(id ButtonCode) bool {
 	return rawBtn(int32(id%32)) > 0
 }
 
@@ -757,7 +757,7 @@ func rawBtnp(id, hold, period int32) bool
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Btnp(id Buttons, hold, period int) bool {
+func Btnp(id ButtonCode, hold, period int) bool {
 	return rawBtnp(int32(id%32), int32(hold), int32(period))
 }
 
@@ -880,7 +880,7 @@ func rawKey(id int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/key
-func Key(id Keys) bool {
+func Key(id KeyCode) bool {
 	return rawKey(int32(id)) > 0
 }
 
@@ -891,7 +891,7 @@ func rawKeyp(id int8, hold, period int32) int32
 // See the [API] for more details.
 //
 // [API]: https://github.com/nesbox/TIC-80/wiki/btnp
-func Keyp(id Keys, hold, period int) bool {
+func Keyp(id KeyCode, hold, period int) bool {
 	return rawKeyp(int8(id), int32(hold), int32(period)) > 0
 }
 
